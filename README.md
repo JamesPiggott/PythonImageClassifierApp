@@ -5,8 +5,7 @@ This repo is a light-weight micro-service app that allows users to upload an ima
 For the front-end I used the tutorial created by Traversy Media as the basis. See tutorial series "Python Flask From Scratch" on YouTube.
 
 To run the application use:
-
-python app.py
+$ python app.py
 
 ## Setting up your Python Virtual Environment
 1. Navigate to the project root directory
@@ -19,3 +18,15 @@ python app.py
 
 ## Setting up the database
 For this app to work you will need to set up a small MySQL database
+
+Login to MySQL and change the password
+mysql -u root
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'
+
+Now create a database called 'myflaskapp'.
+CREATE DATABASE myflaskapp;
+USE myflaskapp;
+
+Create two tables to populate the app with users and articles.
+CREATE TABLE users(id INT(11) AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), email VARCHAR(100), username VARCHAR(30), password VARCHAR(100), register_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE articles(id INT(11) AUTO_INCREMENT PRIMARY Key, title VARCHAR(255), author VARCHAR(100), body TEXT, create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
