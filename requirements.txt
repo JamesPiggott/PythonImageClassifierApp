@@ -2,3 +2,4 @@ flask
 flask_mysqldb
 Flask-WTF
 passlib
+sightengine 

@@ -29,4 +29,14 @@
       </tr>
     {% endfor %}
   </table>
+
+  <h1>Image Classification</h1>
+  <hr>
+  <form action="/classify_image" method="post" enctype="multipart/form-data" >
+      <span class="btn btn-default btn-file">
+        Browse <input type="file" name="image">
+      </span>
+
+    <input type="submit" value="Upload your image" class="btn btn-primary">
+  </form>
 {% endblock %}

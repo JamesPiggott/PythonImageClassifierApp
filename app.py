@@ -1,11 +1,16 @@
+import os
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 #from data import Articles
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+
+UPLOAD_FOLDER = os.path.basename('images')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
@@ -187,6 +192,19 @@ def dashboard():
 class ArticleForm(Form):
     title = StringField('Title', [validators.Length(min=1, max=200)])
     body = TextAreaField('Body', [validators.Length(min=30)])
+
+# Classify image
+@app.route('/classify_image', methods=['GET', 'POST'])
+@is_logged_in
+def classify_image():
+
+    file = request.files['image']
+    f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+
+    # add your custom code to check that the uploaded file is a valid image and not a malicious file (out-of-scope for this post)
+    file.save(f)
+
+    return redirect(url_for('dashboard'))
 
 # Add Article
 @app.route('/add_article', methods=['GET', 'POST'])
