@@ -2,13 +2,21 @@ import os
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 #from data import Articles
 from flask_mysqldb import MySQL
+import flask
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
 from werkzeug.utils import secure_filename
+from PIL import Image
+from keras.applications import ResNet50
+import tensorflow as tf
+from keras.preprocessing.image import img_to_array
+from keras.applications import imagenet_utils
+import numpy as np
+import io
 
 app = Flask(__name__)
-
+model = None
 UPLOAD_FOLDER = os.path.basename('images')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -188,112 +196,79 @@ def dashboard():
     # Close connection
     cur.close()
 
-# Article Form Class
-class ArticleForm(Form):
-    title = StringField('Title', [validators.Length(min=1, max=200)])
-    body = TextAreaField('Body', [validators.Length(min=30)])
+
+def load_model():
+    # load the pre-trained Keras model (here we are using a model
+    # pre-trained on ImageNet and provided by Keras, but you can
+    # substitute in your own networks just as easily)
+    global model
+    model = ResNet50(weights="imagenet")
+    global graph
+    graph = tf.get_default_graph()
+
+def prepare_image(image, target):
+    # if the image mode is not RGB, convert it
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+
+    # resize the input image and preprocess it
+    image = image.resize(target)
+    image = img_to_array(image)
+    image = np.expand_dims(image, axis=0)
+    image = imagenet_utils.preprocess_input(image)
+
+    # return the processed image
+    return image
 
 # Classify image
 @app.route('/classify_image', methods=['GET', 'POST'])
 @is_logged_in
 def classify_image():
+    # initialize the data dictionary that will be returned from the view
+    data = {"success": False}
 
-    file = request.files['image']
-    f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    # ensure an image was properly uploaded to our endpoint
+    if request.method == 'POST':
+        if request.files.get("image"):
+            # read the image in PIL format
+            # image = request.files["image"].read()
+            image = flask.request.files["image"].read()
+                # file = request.files['image']
+                # f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 
-    # add your custom code to check that the uploaded file is a valid image and not a malicious file (out-of-scope for this post)
-    file.save(f)
+            # f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            # file.save(f)
+            image = Image.open(io.BytesIO(image))
 
-    return redirect(url_for('dashboard'))
+            # preprocess the image and prepare it for classification
+            image = prepare_image(image, target=(224, 224))
 
-# Add Article
-@app.route('/add_article', methods=['GET', 'POST'])
-@is_logged_in
-def add_article():
-    form = ArticleForm(request.form)
-    if request.method == 'POST' and form.validate():
-        title = form.title.data
-        body = form.body.data
+            # classify the input image and then initialize the list
+            # of predictions to return to the client
+            with graph.as_default():
 
-        # Create Cursor
-        cur = mysql.connection.cursor()
+                preds = model.predict(image)
+                results = imagenet_utils.decode_predictions(preds)
+                data["predictions"] = []
 
-        # Execute
-        cur.execute("INSERT INTO articles(title, body, author) VALUES(%s, %s, %s)",(title, body, session['username']))
+                # loop over the results and add them to the list of
+                # returned predictions
+                for (imagenetID, label, prob) in results[0]:
+                    r = {"label": label, "probability": float(prob)}
+                    data["predictions"].append(r)
 
-        # Commit to DB
-        mysql.connection.commit()
+                # indicate that the request was a success
+                data["success"] = True
 
-        #Close connection
-        cur.close()
+    # return the data dictionary as a JSON response
+    # return flask.jsonify(data)
 
-        flash('Article Created', 'success')
-
-        return redirect(url_for('dashboard'))
-
-    return render_template('add_article.html', form=form)
-
-
-# Edit Article
-@app.route('/edit_article/<string:id>', methods=['GET', 'POST'])
-@is_logged_in
-def edit_article(id):
-    # Create cursor
-    cur = mysql.connection.cursor()
-
-    # Get article by id
-    result = cur.execute("SELECT * FROM articles WHERE id = %s", [id])
-
-    article = cur.fetchone()
-    cur.close()
-    # Get form
-    form = ArticleForm(request.form)
-
-    # Populate article form fields
-    form.title.data = article['title']
-    form.body.data = article['body']
-
-    if request.method == 'POST' and form.validate():
-        title = request.form['title']
-        body = request.form['body']
-
-        # Create Cursor
-        cur = mysql.connection.cursor()
-        app.logger.info(title)
-        # Execute
-        cur.execute ("UPDATE articles SET title=%s, body=%s WHERE id=%s",(title, body, id))
-        # Commit to DB
-        mysql.connection.commit()
-
-        #Close connection
-        cur.close()
-
-        flash('Article Updated', 'success')
-
-        return redirect(url_for('dashboard'))
-
-    return render_template('edit_article.html', form=form)
-
-# Delete Article
-@app.route('/delete_article/<string:id>', methods=['POST'])
-@is_logged_in
-def delete_article(id):
-    # Create cursor
-    cur = mysql.connection.cursor()
-
-    # Execute
-    cur.execute("DELETE FROM articles WHERE id = %s", [id])
-
-    # Commit to DB
-    mysql.connection.commit()
-
-    #Close connection
-    cur.close()
-
-    flash('Article Deleted', 'success')
-
+    print("Results: ", data)
     return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     app.secret_key='secret123'
+    print(("* Loading Keras model and Flask starting server..."
+            "please wait until server has fully started"))
+    load_model()
     app.run(debug=True)
