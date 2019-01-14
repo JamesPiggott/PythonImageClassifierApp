@@ -32,6 +32,25 @@
 
   <h1>Image Classification</h1>
   <hr>
+
+  <div class="form-group">
+    <label for="model">Select model:</label>
+    <select class="form-control" id="model">
+      <option>Xception</option>
+      <option>VGG16</option>
+      <option>VGG19</option>
+      <option>ResNet50</option>
+      <option>InceptionV3</option>
+      <option>InceptionResNetV2</option>
+      <option>MobileNet</option>
+      <option>MobileNetV2</option>
+      <option>DenseNet121</option>
+      <option>DenseNet169</option>
+      <option>DenseNet201</option>
+      <option>NASNetMobile</option>
+    </select>
+  </div>
+
   <form action="/classify_image" method="post" enctype="multipart/form-data" >
       <span class="btn btn-default btn-file">
         Browse <input type="file" name="image">
