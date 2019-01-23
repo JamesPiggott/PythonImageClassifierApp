@@ -227,7 +227,9 @@ def classify_image():
         # return flask.jsonify(data)
 
     print("Results: ", data)
-    return redirect(url_for('dashboard'))
+    # return redirect(url_for('dashboard', args=data))
+
+    return render_template('dashboard.html', msg=data)
 
 if __name__ == '__main__':
     app.secret_key='secret123'
