@@ -8,7 +8,7 @@ from passlib.hash import sha256_crypt
 from functools import wraps
 from werkzeug.utils import secure_filename
 from PIL import Image
-
+import sqlite3
 import io
 
 from classifier.process import Process
@@ -27,7 +27,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MYSQL
 mysql = MySQL(app)
 
-#Articles = Articles()
+database = "database/kerasapp_db.sqlite"
 
 # Index
 @app.route('/')
@@ -39,41 +39,6 @@ def index():
 @app.route('/about')
 def about():
     return render_template('about.html')
-
-
-# Articles
-@app.route('/articles')
-def articles():
-    # Create cursor
-    cur = mysql.connection.cursor()
-
-    # Get articles
-    result = cur.execute("SELECT * FROM articles")
-
-    articles = cur.fetchall()
-
-    if result > 0:
-        return render_template('articles.html', articles=articles)
-    else:
-        msg = 'No Articles Found'
-        return render_template('articles.html', msg=msg)
-    # Close connection
-    cur.close()
-
-
-#Single Article
-@app.route('/article/<string:id>/')
-def article(id):
-    # Create cursor
-    cur = mysql.connection.cursor()
-
-    # Get article
-    result = cur.execute("SELECT * FROM articles WHERE id = %s", [id])
-
-    article = cur.fetchone()
-
-    return render_template('article.html', article=article)
-
 
 # Register Form Class
 class RegisterForm(Form):
@@ -98,13 +63,14 @@ def register():
         password = sha256_crypt.encrypt(str(form.password.data))
 
         # Create cursor
-        cur = mysql.connection.cursor()
+        cur = sqlite3.connect(database)
+        c = cur.cursor()
 
         # Execute query
-        cur.execute("INSERT INTO users(name, email, username, password) VALUES(%s, %s, %s, %s)", (name, email, username, password))
+        c.execute("INSERT INTO users(name, email, username, password) VALUES(?, ?, ?, ?)", (name, email, username, password,))
 
         # Commit to DB
-        mysql.connection.commit()
+        cur.commit()
 
         # Close connection
         cur.close()
@@ -124,15 +90,22 @@ def login():
         password_candidate = request.form['password']
 
         # Create cursor
-        cur = mysql.connection.cursor()
+        cur = sqlite3.connect(database)
+        c = cur.cursor()
 
         # Get user by username
-        result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
+        result = c.execute("SELECT * FROM users WHERE username =?", (username,))
 
-        if result > 0:
+        if result:
             # Get stored hash
-            data = cur.fetchone()
-            password = data['password']
+            data = c.fetchone()
+
+            if data is None:
+                cur.close()
+                error = 'Username not found'
+                return render_template('login.html', error=error)
+
+            password = data[4]
 
             # Compare Passwords
             if sha256_crypt.verify(password_candidate, password):
@@ -145,8 +118,10 @@ def login():
             else:
                 error = 'Invalid login'
                 return render_template('login.html', error=error)
+
             # Close connection
             cur.close()
+
         else:
             error = 'Username not found'
             return render_template('login.html', error=error)
@@ -176,23 +151,9 @@ def logout():
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
-    # Create cursor
-    cur = mysql.connection.cursor()
+    print()
+    return render_template('dashboard.html')
 
-    # Get articles
-    #result = cur.execute("SELECT * FROM articles")
-    # Show articles only from the user logged in
-    result = cur.execute("SELECT * FROM articles WHERE author = %s", [session['username']])
-
-    articles = cur.fetchall()
-
-    if result > 0:
-        return render_template('dashboard.html', articles=articles)
-    else:
-        msg = 'No Articles Found'
-        return render_template('dashboard.html', msg=msg)
-    # Close connection
-    cur.close()
 
 # Classify image
 @app.route('/classify_image', methods=['GET', 'POST'])
