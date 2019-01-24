@@ -8,17 +8,17 @@ To run the application use:
 $ python app.py
 
 ## TODO list
+
 The following items are going to be included in future builds.
 * Use SQLite database so DB is portable (done)
 * Integrate Intel Neural Compute Stick 2
 * Create button to switch between CPU and VPU for classification
 * Allow user to create their own rudimentary model and train this model
-* Add asyncio, multiprocessing and multithreading were convenient
-* Ensure the solution cna run in the cloud with Docker
+* Add asyncio, multiprocessing and multi-threading were convenient
+* Ensure the solution can run in the cloud with Docker
 
-## Installation if the application
+## Installation of the application
 
-### Setting up your Python Virtual Environment
 1. Navigate to the project root directory
 2. You are going to need to install python3.6-dev
   $ sudo add-apt-repository ppa:deadsnakes/ppa

@@ -1,4 +1,4 @@
-from keras.applications import ResNet50
+from keras.applications import *
 import tensorflow as tf
 from keras.preprocessing.image import img_to_array
 from keras.applications import imagenet_utils
@@ -10,6 +10,19 @@ class Process:
 
     def __init__(self):
         self.load_model()
+
+    def process_model_request(self, model_name):
+        global model
+        if 'VGG16' in model_name:
+            model = VGG16(weights='imagenet')
+        if 'VGG19' in model_name:
+            model = VGG19(weights='imagenet')
+        if 'InceptionV3' in model_name:
+            model = InceptionV3(weights='imagenet')
+        if 'MobileNet' in model_name:
+            model = MobileNet(weights='imagenet')
+        global graph
+        graph = tf.get_default_graph()
 
     def load_model(self):
         # load the pre-trained Keras model (here we are using a model

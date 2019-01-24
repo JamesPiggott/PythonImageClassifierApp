@@ -171,6 +171,7 @@ def classify_image():
 
             if "ResNet50" not in model_choice :
                 print("Maybe we should load a new model:", model_choice)
+                # classify_process.process_model_request(model_choice)
             else:
                 print("ResNet50 is already loaded")
 
