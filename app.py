@@ -11,6 +11,7 @@ from PIL import Image
 import sqlite3
 import io
 
+import multiprocessing as mp
 from classifier.process import Process
 
 app = Flask(__name__)
@@ -171,6 +172,11 @@ def classify_image():
 
             if "ResNet50" not in model_choice :
                 print("Maybe we should load a new model:", model_choice)
+
+                # process = mp.Process(target=classify_process.process_model_request, args=(model_choice))
+                # process.start()
+                # process.join()
+
                 # classify_process.process_model_request(model_choice)
             else:
                 print("ResNet50 is already loaded")
