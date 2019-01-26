@@ -17,16 +17,16 @@ from classifier.process import Process
 app = Flask(__name__)
 model = None
 UPLOAD_FOLDER = os.path.basename('images')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Config MySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'kane2026'
-app.config['MYSQL_DB'] = 'myflaskapp'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+#
+# # Config MySQL
+# app.config['MYSQL_HOST'] = 'localhost'
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_PASSWORD'] = 'kane2026'
+# app.config['MYSQL_DB'] = 'myflaskapp'
+# app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MYSQL
-mysql = MySQL(app)
+# mysql = MySQL(app)
 
 database = "database/kerasapp_db.sqlite"
 
