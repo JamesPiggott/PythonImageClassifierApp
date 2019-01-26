@@ -10,9 +10,8 @@ $ python app.py
 ## Installation of the application
 You are going to need to install python3.6-dev
 
-$ sudo add-apt-repository ppa:deadsnakes/ppa
-
-$ sudo apt-get install python3.6-dev
+* add-apt-repository ppa:deadsnakes/ppa
+* apt-get install python3.6-dev
 
 Install dependencies with: pip3 install -r requirements.txt
 
