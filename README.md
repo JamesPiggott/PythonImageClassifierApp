@@ -7,21 +7,22 @@ For the front-end I used the tutorial created by Traversy Media. See "Python Fla
 To run the application use:
 $ python app.py
 
+## Installation of the application
+You are going to need to install python3.6-dev
+
+$ sudo add-apt-repository ppa:deadsnakes/ppa
+
+$ sudo apt-get install python3.6-dev
+
+Install dependencies with: pip3 install -r requirements.txt
+
 ## TODO list
 
 The following items are going to be included in future builds.
-* Use SQLite database so DB is portable (done)
+* Allow users to choose among several classifiers packages with keras
+* Allow users to store images into a folder for easy use
 * Integrate Intel Neural Compute Stick 2
 * Create button to switch between CPU and VPU for classification
 * Allow user to create their own rudimentary model and train this model
 * Add asyncio, multiprocessing and multi-threading were convenient
-* Ensure the solution can run in the cloud with Docker
-
-## Installation of the application
-
-1. Navigate to the project root directory
-2. You are going to need to install python3.6-dev
-  $ sudo add-apt-repository ppa:deadsnakes/ppa
-  $ sudo apt-get install python3.6-dev
-3. Activate your virtual environment
-5. Install dependencies with: pip3 install -r requirements.txt
+* Ensure the application can run in the cloud with Docker
