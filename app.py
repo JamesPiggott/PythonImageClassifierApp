@@ -1,7 +1,5 @@
 import os
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
-#from data import Articles
-# from flask_mysqldb import MySQL
 import flask
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
@@ -11,22 +9,13 @@ from PIL import Image
 import sqlite3
 import io
 
-import multiprocessing as mp
+from multiprocessing import Process as mp
+from multiprocessing import Queue
 from classifier.process import Process
 
 app = Flask(__name__)
 model = None
 UPLOAD_FOLDER = os.path.basename('images')
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-#
-# # Config MySQL
-# app.config['MYSQL_HOST'] = 'localhost'
-# app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_PASSWORD'] = 'kane2026'
-# app.config['MYSQL_DB'] = 'myflaskapp'
-# app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-# init MYSQL
-# mysql = MySQL(app)
 
 database = "database/kerasapp_db.sqlite"
 
@@ -170,38 +159,32 @@ def classify_image():
 
             model_choice = request.form['model']
 
-            if "ResNet50" not in model_choice :
-                print("Maybe we should load a new model:", model_choice)
+            q = Queue()
 
-                # process = mp.Process(target=classify_process.process_model_request, args=(model_choice))
-                # process.start()
-                # process.join()
+            classify = mp(target=setup_classify_model, args=(model_choice, image, q,))
+            classify.start()
 
-                # classify_process.process_model_request(model_choice)
-            else:
-                print("ResNet50 is already loaded")
+            data = q.get()
 
-            # f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            # file.save(f)
-
-            image = Image.open(io.BytesIO(image))
-
-            # preprocess the image and prepare it for classification
-            image = classify_process.prepare_image(image, target=(224, 224))
-
-            data = classify_process.perform_inference(image)
-
-        # return the data dictionary as a JSON response
-        # return flask.jsonify(data)
-
-    print("Results: ", data)
-    # return redirect(url_for('dashboard', args=data))
+            classify.join()
 
     return render_template('dashboard.html', msg=data)
+
+def setup_classify_model(model_choice, image, queue):
+    print()
+    process = Process()
+    process.process_model_request(model_choice)
+
+    image = Image.open(io.BytesIO(image))
+
+    # preprocess the image and prepare it for classification
+    image = process.prepare_image(image, target=(224, 224))
+
+    process.perform_inference(image, queue)
+
 
 if __name__ == '__main__':
     app.secret_key='secret123'
     print(("* Loading Keras model and Flask starting server..."
             "please wait until server has fully started"))
-    classify_process = Process()
     app.run(debug=True)
