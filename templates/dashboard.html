@@ -4,7 +4,7 @@
   <h1>Dashboard <small> Welcome {{session.username}}</small></h1>
 
   <h1>Image Classification</h1>
-  <p>Select the pre-trained model (classifier) you wish to use and the image to use it own</p>
+  <p>Select the pre-trained model (classifier) you wish to use and the image to use it on</p>
   <hr>
   <p></p>
   <p></p>
@@ -13,10 +13,10 @@
         <label for="inputState">Select model:</label>
         <select id="inputState" class="form-control" name="model" value={{request.form.model}}>
           <option selected>Choose...</option>
-          <option>Xception</option>
+          <option>ResNet50</option>
           <option>VGG16</option>
           <option>VGG19</option>
-          <option>ResNet50</option>
+          <option>Xception</option>
           <option>InceptionV3</option>
           <option>InceptionResNetV2</option>
           <option>MobileNet</option>

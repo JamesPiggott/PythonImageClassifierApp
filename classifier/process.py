@@ -10,47 +10,63 @@ class Process:
 
     def __init__(self):
         print()
+        self._target = 224
 
     def process_model_request(self, model_name):
         if 'ResNet50' in model_name:
             self.model = ResNet50(weights='imagenet')
             self.model_choice = "ResNet50"
-        if 'VGG16' in model_name:   # 224 * 224
+            self.target = 224
+        if 'VGG16' in model_name:
             self.model = VGG16(weights='imagenet')
             self.model_choice = "VGG16"
-        if 'VGG19' in model_name:   # 224 * 224
+            self._target = 224
+        if 'VGG19' in model_name:
             self.model = VGG19(weights='imagenet')
             self.model_choice = "VGG19"
+            self._target = 224
+        if 'Xception' in model_name:
+            self.model = Xception(weights='imagenet')
+            self.model_choice = "Xception"
+            self._target = 299
         if 'InceptionV3' in model_name:
             self.model = InceptionV3(weights='imagenet')
             self.model_choice = "InceptionV3"
-        if 'MobileNet' in model_name:
-            self.model = MobileNet(weights='imagenet')
-            self.model_choice = "MobileNet"
-        if 'Xception' in model_name:  #  299 * 299
-            self.model = Xception(weights='imagenet')
-            self.model_choice = "Xception"
+            self._target = 299
         if 'InceptionResNetV2' in model_name:
             self.model = InceptionResNetV2(weights='imagenet')
             self.model_choice = "InceptionResNetV2"
-        if 'MobileNetV2' in model_name: # 224 * 224
+            self._target = 299
+        if 'MobileNet' in model_name:
+            self.model = MobileNet(weights='imagenet')
+            self.model_choice = "MobileNet"
+            self._target = 224
+        if 'MobileNetV2' in model_name:
             self.model = MobileNetV2(weights='imagenet')
             self.model_choice = "MobileNetV2"
+            self._target = 224
         if 'DenseNet121' in model_name:
             self.model = DenseNet121(weights='imagenet')
             self.model_choice = "DenseNet121"
+            self._target = 224
         if 'DenseNet169' in model_name:
             self.model = DenseNet169(weights='imagenet')
             self.model_choice = "DenseNet169"
+            self._target = 224
         if 'DenseNet201' in model_name:
             self.model = DenseNet201(weights='imagenet')
             self.model_choice = "DenseNet201"
+            self._target = 224
         if 'NASNetMobile' in model_name:
             self.model = NASNetMobile(weights='imagenet')
             self.model_choice = "NASNetMobile"
+            self._target = 224
         global graph
         graph = tf.get_default_graph()
 
+    # @property
+    def get_image_dimension_target(self):
+        return (self._target, self._target)
 
     def load_model(self):
         # load the pre-trained Keras model (here we are using a model
@@ -67,7 +83,7 @@ class Process:
             image = image.convert("RGB")
 
         # resize the input image and preprocess it
-        image = image.resize(target)
+        image = image.resize(self.get_image_dimension_target())
         image = img_to_array(image)
         image = np.expand_dims(image, axis=0)
         image = imagenet_utils.preprocess_input(image)
