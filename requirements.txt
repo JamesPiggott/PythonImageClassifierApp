@@ -2,8 +2,8 @@ flask
 Flask-WTF
 passlib
 sightengine
-numpy 
-scipy
+numpy==1.14.1
+scipy>=0.15.1
 scikit-learn
 tensorflow
 pillow
