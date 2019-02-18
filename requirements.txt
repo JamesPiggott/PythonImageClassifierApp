@@ -7,3 +7,7 @@ scipy>=0.15.1
 scikit-learn
 pillow
 h5py
+wtforms
+werkzeug
+tensorflow
+keras
